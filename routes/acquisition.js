@@ -3,19 +3,64 @@ var express = require('express');
 var app = express();
 
 var Acquisition = require('../models/acquisition');
+var Doc = require('../models/doc');
 
 // ==========================================
-// Obtener todos las adquisiciones
+// Obtener todos las adquisiciones JSON estructure
+// ==========================================
+app.get('/all', (req, res, next) => {
+
+    
+    Acquisition.find({})
+        .exec(
+            (err, acquisitions) => {
+
+                if (err) {
+                    return res.status(500).json({
+                        ok: false,
+                        mensaje: 'Error cargando acquisition',
+                        errors: err
+                    });
+                }
+
+
+                    res.status(200).json({
+                        ok: true,
+                        acquisitions: acquisitions.forEach((elemento)=>{
+                            Doc.find({"_id":elemento._id})
+                                .exec(
+
+                                )
+                        
+                        }),
+                        
+                    });
+                
+
+            });
+});
+
+function mostrarDocs(acquisitions, res){
+    Doc.findById(id, (err, doc)=>{
+
+        if (err) {
+            return res.status(500).json({
+                ok: false,
+                mensaje: 'Error cargando acquisition',
+                errors: err
+            });
+        }
+        
+    });
+ }
+
+// ==========================================
+// Obtener todos las adquisiciones 
 // ==========================================
 app.get('/', (req, res, next) => {
 
-    var desde = req.query.desde || 0;
-    desde = Number(desde);
-
+    
     Acquisition.find({})
-        .skip(desde)
-        .limit(5)
-        .populate('user', 'name email')
         .exec(
             (err, acquisitions) => {
 
@@ -38,7 +83,6 @@ app.get('/', (req, res, next) => {
 
             });
 });
-
 
 // ==========================================
 // Actualizar Acquisition
@@ -67,17 +111,15 @@ app.put('/:id', (req, res) => {
             });
         }
 
-
+        acquisition.section = body.section;
         acquisition.titulo = body.titulo;
+        acquisition.estado = body.estado;
+        acquisition.correo = body.correo;
         acquisition.fecha_invitacion = body.fecha_invitacion;
         acquisition.fecha_presentacion = body.fecha_presentacion;
         acquisition.fecha_ampliacion = body.fecha_ampliacion;
         acquisition.fecha_consultas = body.fecha_consultas;
-        acquisition.estado = body.estado;
-        acquisition.correo = body.correo;
-
-        acquisition.user = req.user._id;
-
+        
         acquisition.save((err, acquisitionSaved) => {
 
             if (err) {
@@ -109,14 +151,15 @@ app.post('/', (req, res) => {
     var body = req.body;
 
     var acquisition = new Acquisition({
+        section: body.titulo,
         titulo: body.titulo,
+        estado: body.estado,
+        correo: body.correo,
         fecha_invitacion: body.fecha_invitacion,
         fecha_presentacion: body.fecha_presentacion,
         fecha_ampliacion: body.fecha_ampliacion,
-        fecha_consultas: body.fecha_consultas,
-        estado: body.estado,
-        correo: body.correo
-
+        fecha_consultas: body.fecha_consultas
+        
     });
 
     acquisition.save((err, acquisitionSaved) => {

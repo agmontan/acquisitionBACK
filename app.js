@@ -16,6 +16,7 @@ app.use(bodyParser.json())
 // Importar rutas
 var appRoutes = require('./routes/app');
 var acquisitionRoutes = require('./routes/acquisition');
+var docRoutes = require('./routes/doc');
 var uploadFile = require('./routes/upload');
 
 
@@ -38,6 +39,7 @@ mongoose.connection.openUri('mongodb://localhost:27017/AcquisitionDB', (err, res
 
 // Rutas
 app.use('/acquisition', acquisitionRoutes);
+app.use('/doc', docRoutes);
 app.use('/up', uploadFile);
 
 app.use('/', appRoutes);
